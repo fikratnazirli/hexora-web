@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+
+Sitemap: https://fikratnazirli.github.io/hexora-web/sitemap.xml
