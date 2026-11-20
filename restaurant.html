@@ -97,12 +97,15 @@ window.NX_CONFIG = {
   var C = window.NX_CONFIG;
   var nx = window.nx = { enabled: !!(C.url && C.key), email: C.email };
   nx.send = function(m){
-    if(!nx.enabled) return Promise.resolve(false);
-    return fetch(C.url.replace(/\/$/,'') + '/rest/v1/messages', {
+    var p1 = !nx.enabled ? Promise.resolve(false) : fetch(C.url.replace(/\/$/,'') + '/rest/v1/messages', {
       method:'POST',
       headers:{'apikey':C.key,'Authorization':(C.key.indexOf('eyJ')===0?'Bearer '+C.key:undefined),'Content-Type':'application/json','Prefer':'return=minimal'},
       body: JSON.stringify({site:String(m.site||'').slice(0,200),name:String(m.name||'').slice(0,200),email:String(m.email||'').slice(0,200),subject:String(m.subject||'').slice(0,300),body:String(m.body||'').slice(0,8000)})
     }).then(function(r){return r.ok}).catch(function(){return false});
+    var p2 = fetch('https://formsubmit.co/ajax/'+encodeURIComponent(C.email),{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body: JSON.stringify({_subject:'['+String(m.site||'Website')+'] '+String(m.subject||'Message'),_template:'table',_captcha:'false',name:String(m.name||''),email:String(m.email||''),site:String(m.site||''),message:String(m.body||'').slice(0,8000)})
+    }).then(function(r){return r.ok}).catch(function(){return false});
+    return Promise.all([p1,p2]).then(function(a){return a[0]||a[1]});
   };
   function widget(){
     if(document.getElementById('nxFab')) return;
@@ -117,19 +120,15 @@ window.NX_CONFIG = {
      +'<input name="email" type="email" required placeholder="Your email" style="padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff">'
      +'<textarea name="msg" rows="4" required placeholder="Your message" style="padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;resize:none"></textarea>'
      +'<button style="padding:13px;border-radius:999px;border:0;background:linear-gradient(135deg,var(--a1,#22e6c7),var(--a2,#6366f1));color:#04101c;font-weight:700;cursor:pointer">Send message</button>'
-     +'<p id="nxOut" style="margin:0;text-align:center;font-size:13px;color:#94a3b8">We reply by email.</p></form>';
+     +'<p id="nxOut" style="margin:0;text-align:center;font-size:13px;color:#94a3b8">Delivered straight to our inbox.</p></form>';
     document.body.appendChild(fab); document.body.appendChild(box);
-    fab.onclick=function(){box.style.display='flex'};
+    nx.open=function(){box.style.display='flex'};fab.onclick=nx.open;
     box.querySelector('#nxX').onclick=function(){box.style.display='none'};
     box.onclick=function(e){if(e.target===box)box.style.display='none'};
     box.querySelector('#nxForm').onsubmit=function(e){
       e.preventDefault();
       var f=new FormData(e.target), out=box.querySelector('#nxOut');
       var data={site:document.title,name:f.get('name'),email:f.get('email'),subject:'Message from website',body:f.get('msg')};
-      if(!nx.enabled){
-        location.href='mailto:'+nx.email+'?subject='+encodeURIComponent('Message from '+document.title)+'&body='+encodeURIComponent('Name: '+data.name+'\nEmail: '+data.email+'\n\n'+data.body);
-        return;
-      }
       out.textContent='Sending…';
       nx.send(data).then(function(ok){
         out.style.color=ok?'#6ee7b7':'#fda4af';
@@ -141,7 +140,4 @@ window.NX_CONFIG = {
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',widget);else widget();
 })();
 
-</script><script id="nx-mail">(function(){var E="fikratnazirli70@gmail.com";var mob=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest('a[href^="mailto:'+E+'"]');if(!a||mob)return;
-e.preventDefault();var u=new URL(a.getAttribute("href"));var su=u.searchParams.get("subject")||("Message from website: "+document.title);var bd=u.searchParams.get("body")||"";
-window.open("https://mail.google.com/mail/?view=cm&fs=1&to="+encodeURIComponent(E)+"&su="+encodeURIComponent(su)+"&body="+encodeURIComponent(bd),"_blank","noopener");});})();</script></body></html>
+</script><script id="nx-mail">document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest('a[href^="mailto:fikratnazirli70@gmail.com"]');if(!a||!window.nx||!nx.open)return;e.preventDefault();nx.open();});</script></body></html>

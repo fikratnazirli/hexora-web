@@ -2,7 +2,28 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><title>Nexora Web — Admin</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<style>body{background:#040a1c;color:#cbd5e1;font-family:Inter,system-ui,sans-serif}.glass{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(10px)}</style></head>
+<style>body{background:#040a1c;color:#cbd5e1;font-family:Inter,system-ui,sans-serif}.glass{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(10px)}</style><style id="nx-mobile">
+html,body{max-width:100%;overflow-x:hidden}
+img,video,canvas,svg{max-width:100%}
+*{-webkit-tap-highlight-color:transparent}
+@media(max-width:640px){
+ header>div{gap:.5rem!important;padding-left:1rem!important;padding-right:1rem!important;height:auto!important;min-height:4.25rem}
+ header>div>a:first-child{min-width:0;flex:1 1 auto}
+ header>div>a:first-child span.font-display{font-size:1rem!important;line-height:1.15;overflow-wrap:anywhere}
+ header .btn{padding:.65rem .95rem!important;font-size:.8rem!important;flex:0 0 auto;min-height:44px;display:inline-flex;align-items:center}
+ footer a,footer button{display:inline-block;padding:.75rem .4rem}
+ body>div:first-of-type a,#demoNote a{display:inline-block;padding:.5rem .25rem}
+ input,select,textarea{font-size:16px!important;min-height:44px}
+ button,.btn,.chip{min-height:44px}
+ h1{overflow-wrap:anywhere}
+ section{scroll-margin-top:80px}
+ body{padding-bottom:72px}
+ .relative.z-50.border-b a{display:inline-block;padding:.8rem .5rem}
+ .relative.z-50.border-b{padding-top:0!important;padding-bottom:0!important}
+}
+#lf{width:100%;max-width:24rem;min-width:0;box-sizing:border-box}
+#list *,#msgs *{overflow-wrap:anywhere}
+</style></head>
 <body class="min-h-screen">
 <div id="login" class="min-h-screen grid place-items-center p-5">
  <form id="lf" class="glass rounded-3xl p-8 w-full max-w-sm grid gap-4">
@@ -36,12 +57,15 @@ window.NX_CONFIG = {
   var C = window.NX_CONFIG;
   var nx = window.nx = { enabled: !!(C.url && C.key), email: C.email };
   nx.send = function(m){
-    if(!nx.enabled) return Promise.resolve(false);
-    return fetch(C.url.replace(/\/$/,'') + '/rest/v1/messages', {
+    var p1 = !nx.enabled ? Promise.resolve(false) : fetch(C.url.replace(/\/$/,'') + '/rest/v1/messages', {
       method:'POST',
       headers:{'apikey':C.key,'Authorization':(C.key.indexOf('eyJ')===0?'Bearer '+C.key:undefined),'Content-Type':'application/json','Prefer':'return=minimal'},
       body: JSON.stringify({site:String(m.site||'').slice(0,200),name:String(m.name||'').slice(0,200),email:String(m.email||'').slice(0,200),subject:String(m.subject||'').slice(0,300),body:String(m.body||'').slice(0,8000)})
     }).then(function(r){return r.ok}).catch(function(){return false});
+    var p2 = fetch('https://formsubmit.co/ajax/'+encodeURIComponent(C.email),{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body: JSON.stringify({_subject:'['+String(m.site||'Website')+'] '+String(m.subject||'Message'),_template:'table',_captcha:'false',name:String(m.name||''),email:String(m.email||''),site:String(m.site||''),message:String(m.body||'').slice(0,8000)})
+    }).then(function(r){return r.ok}).catch(function(){return false});
+    return Promise.all([p1,p2]).then(function(a){return a[0]||a[1]});
   };
   function widget(){
     if(document.getElementById('nxFab')) return;
@@ -56,19 +80,15 @@ window.NX_CONFIG = {
      +'<input name="email" type="email" required placeholder="Your email" style="padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff">'
      +'<textarea name="msg" rows="4" required placeholder="Your message" style="padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#fff;resize:none"></textarea>'
      +'<button style="padding:13px;border-radius:999px;border:0;background:linear-gradient(135deg,var(--a1,#22e6c7),var(--a2,#6366f1));color:#04101c;font-weight:700;cursor:pointer">Send message</button>'
-     +'<p id="nxOut" style="margin:0;text-align:center;font-size:13px;color:#94a3b8">We reply by email.</p></form>';
+     +'<p id="nxOut" style="margin:0;text-align:center;font-size:13px;color:#94a3b8">Delivered straight to our inbox.</p></form>';
     document.body.appendChild(fab); document.body.appendChild(box);
-    fab.onclick=function(){box.style.display='flex'};
+    nx.open=function(){box.style.display='flex'};fab.onclick=nx.open;
     box.querySelector('#nxX').onclick=function(){box.style.display='none'};
     box.onclick=function(e){if(e.target===box)box.style.display='none'};
     box.querySelector('#nxForm').onsubmit=function(e){
       e.preventDefault();
       var f=new FormData(e.target), out=box.querySelector('#nxOut');
       var data={site:document.title,name:f.get('name'),email:f.get('email'),subject:'Message from website',body:f.get('msg')};
-      if(!nx.enabled){
-        location.href='mailto:'+nx.email+'?subject='+encodeURIComponent('Message from '+document.title)+'&body='+encodeURIComponent('Name: '+data.name+'\nEmail: '+data.email+'\n\n'+data.body);
-        return;
-      }
       out.textContent='Sending…';
       nx.send(data).then(function(ok){
         out.style.color=ok?'#6ee7b7':'#fda4af';
