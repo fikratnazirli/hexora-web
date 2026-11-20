@@ -26,6 +26,27 @@ body{background:#040a1c}
 input,textarea,select{outline:none}input:focus,textarea:focus,select:focus{border-color:var(--a1)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--a1) 25%,transparent)}
 select option{background:#0a1433}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
+</style><style id="nx-mobile">
+html,body{max-width:100%;overflow-x:hidden}
+img,video,canvas,svg{max-width:100%}
+*{-webkit-tap-highlight-color:transparent}
+@media(max-width:640px){
+ header>div{gap:.5rem!important;padding-left:1rem!important;padding-right:1rem!important;height:auto!important;min-height:4.25rem}
+ header>div>a:first-child{min-width:0;flex:1 1 auto}
+ header>div>a:first-child span.font-display{font-size:1rem!important;line-height:1.15;overflow-wrap:anywhere}
+ header .btn{padding:.65rem .95rem!important;font-size:.8rem!important;flex:0 0 auto;min-height:44px;display:inline-flex;align-items:center}
+ footer a,footer button{display:inline-block;padding:.75rem .4rem}
+ body>div:first-of-type a,#demoNote a{display:inline-block;padding:.5rem .25rem}
+ input,select,textarea{font-size:16px!important;min-height:44px}
+ button,.btn,.chip{min-height:44px}
+ h1{overflow-wrap:anywhere}
+ section{scroll-margin-top:80px}
+ body{padding-bottom:72px}
+ .relative.z-50.border-b a{display:inline-block;padding:.8rem .5rem}
+ .relative.z-50.border-b{padding-top:0!important;padding-bottom:0!important}
+}
+#lf{width:100%;max-width:24rem;min-width:0;box-sizing:border-box}
+#list *,#msgs *{overflow-wrap:anywhere}
 </style></head>
 <body class="font-sans text-slate-300 antialiased overflow-x-hidden">
 <div class="fixed inset-0 -z-10 overflow-hidden bg-gradient-to-b from-ink via-navy-900 to-ink">
@@ -120,4 +141,7 @@ window.NX_CONFIG = {
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',widget);else widget();
 })();
 
-</script></body></html>
+</script><script id="nx-mail">(function(){var E="fikratnazirli70@gmail.com";var mob=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest('a[href^="mailto:'+E+'"]');if(!a||mob)return;
+e.preventDefault();var u=new URL(a.getAttribute("href"));var su=u.searchParams.get("subject")||("Message from website: "+document.title);var bd=u.searchParams.get("body")||"";
+window.open("https://mail.google.com/mail/?view=cm&fs=1&to="+encodeURIComponent(E)+"&su="+encodeURIComponent(su)+"&body="+encodeURIComponent(bd),"_blank","noopener");});})();</script></body></html>
