@@ -135,9 +135,41 @@ img,video,canvas,svg{max-width:100%}
 @keyframes nxN{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-4%) scale(1.06)}}
 @media (prefers-reduced-motion:reduce){.nx-orbit::before,.nx-lg,.nx-lg .nx-n{animation:none}}
 </style>
+<style id="nx-fx">
+@keyframes nxUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+@keyframes nxPop{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
+@keyframes nxLoad{to{transform:none}}
+#nxSplash{position:fixed;inset:0;z-index:200;background:#040a1c;display:flex;align-items:center;justify-content:center;transition:opacity .7s ease,visibility .7s}
+#nxSplash.hide{opacity:0;visibility:hidden}
+.nx-sp-in{display:flex;flex-direction:column;align-items:center;gap:22px;animation:nxPop .9s cubic-bezier(.2,.8,.2,1) both}
+.nx-sp-name{font:700 30px "Space Grotesk",Inter,system-ui,sans-serif;color:#fff;letter-spacing:.02em;animation:nxUp .8s .35s both}
+.nx-sp-name span{color:#22e6c7}
+.nx-sp-bar{width:150px;height:3px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden}
+.nx-sp-bar i{display:block;height:100%;background:linear-gradient(90deg,#3b8bff,#22e6c7);transform:translateX(-100%);animation:nxLoad 1.3s .2s ease forwards}
+.nx-hero-item{opacity:0;transform:translateY(26px)}
+body.nx-ready .nx-hero-item{animation:nxUp .85s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(var(--i,0)*.13s + .15s)}
+.reveal{transform:translateY(44px) scale(.97);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.7,.2,1)}
+.reveal.show{transform:none}
+section .glass.rounded-2xl.show:hover{transform:translateY(-6px);border-color:rgba(94,176,255,.45);box-shadow:0 22px 50px -22px rgba(34,230,199,.35);transition-delay:0s!important}
+section .glass.rounded-2xl{transition:transform .35s ease,border-color .35s ease,box-shadow .35s ease,opacity .9s ease}
+.btn-primary{position:relative;overflow:hidden}
+.btn-primary::after{content:"";position:absolute;top:0;left:-70%;width:45%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);pointer-events:none}
+.btn-primary:hover::after{animation:nxShine .9s ease}
+@keyframes nxShine{to{left:130%}}
+header nav a{position:relative}
+header nav a::after{content:"";position:absolute;left:0;bottom:-6px;height:2px;width:100%;background:linear-gradient(90deg,#3b8bff,#22e6c7);transform:scaleX(0);transform-origin:left;transition:transform .3s ease}
+header nav a:hover::after{transform:scaleX(1)}
+#nxProg{position:fixed;top:0;left:0;height:3px;width:100%;z-index:150;background:linear-gradient(90deg,#3b8bff,#22e6c7);transform:scaleX(0);transform-origin:left;pointer-events:none}
+#nxCur{position:fixed;left:0;top:0;width:460px;height:460px;margin:-230px 0 0 -230px;border-radius:50%;background:radial-gradient(circle,rgba(59,139,255,.13),transparent 62%);pointer-events:none;z-index:1;display:none}
+@media (hover:hover) and (pointer:fine){#nxCur{display:block}}
+@media (prefers-reduced-motion:reduce){#nxSplash{display:none}.nx-hero-item{opacity:1;transform:none}#nxCur{display:none}}
+</style>
 </head>
 
 <body class="font-sans text-slate-300 antialiased overflow-x-hidden">
+<div id="nxSplash" aria-hidden="true"><div class="nx-sp-in"><span class="nx-orbit"><span class="nx-lg" style="width:112px;height:112px"><img src="logo-globe.png" alt="" /><img class="nx-n" src="logo-n.png" alt="" /></span></span><div class="nx-sp-name">Nexora<span>.</span>Web</div><div class="nx-sp-bar"><i></i></div></div></div>
+<div id="nxProg"></div><div id="nxCur"></div>
+
 
   <!-- ============ ANIMATED BACKGROUND ============ -->
   <div class="fixed inset-0 -z-10 overflow-hidden bg-gradient-to-b from-ink via-navy-900 to-ink">
@@ -786,5 +818,29 @@ if(mob){location.href="mailto:"+E+"?subject="+encodeURIComponent(su)+"&body="+en
     if(st!=='en') set(st,false); else set('en',false);
   })();
   </script>
+<script id="nx-fx-js">
+(function(){
+  var sp=document.getElementById('nxSplash'),t0=Date.now();
+  function done(){ if(!sp) return; var x=sp; sp=null; x.classList.add('hide'); document.body.classList.add('nx-ready'); setTimeout(function(){x.remove();},900); }
+  function go(){ setTimeout(done,Math.max(0,1500-(Date.now()-t0))); }
+  if(document.readyState==='complete') go(); else window.addEventListener('load',go);
+  setTimeout(done,3500);
+  var h=document.querySelector('main section .reveal');
+  if(h){ var i=0; Array.prototype.forEach.call(h.children,function(c){c.classList.add('nx-hero-item');c.style.setProperty('--i',i++);});
+    var m=h.parentNode.children[1]; if(m){m.classList.add('nx-hero-item');m.style.setProperty('--i',i);} }
+  document.querySelectorAll('.grid').forEach(function(g){
+    var k=0; Array.prototype.forEach.call(g.children,function(c){ if(c.classList.contains('reveal')&&!c.style.transitionDelay){c.style.transitionDelay=(k*0.09)+'s';k++;} });
+  });
+  var pr=document.getElementById('nxProg');
+  function sc(){ var d=document.documentElement,max=d.scrollHeight-d.clientHeight; pr.style.transform='scaleX('+(max>0?Math.min(1,window.scrollY/max):0)+')'; }
+  window.addEventListener('scroll',sc,{passive:true}); sc();
+  var cur=document.getElementById('nxCur');
+  if(cur&&window.matchMedia('(hover:hover) and (pointer:fine)').matches){
+    var tx=0,ty=0,x=0,y=0,on=false;
+    window.addEventListener('mousemove',function(e){tx=e.clientX;ty=e.clientY;if(!on){on=true;x=tx;y=ty;loop();}},{passive:true});
+    function loop(){ x+=(tx-x)*.12; y+=(ty-y)*.12; cur.style.transform='translate('+x+'px,'+y+'px)'; requestAnimationFrame(loop); }
+  }
+})();
+</script>
 </body>
 </html>
